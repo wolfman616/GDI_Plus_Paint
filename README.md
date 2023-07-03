@@ -2,6 +2,8 @@
 Windows GDI+ Drawing tool compatible with stylus-tablet devices.
 </br>
 <img width="476" alt="Clipboarder 2023 07 02-003" src="https://github.com/wolfman616/GDI_Plus_Paint/assets/62726599/a6c397a0-9569-41f4-ac81-52a5a941a61b">
+<img width="337" alt="Clipboarder 2023 07 03-007" src="https://github.com/wolfman616/GDI_Plus_Paint/assets/62726599/b8b941f0-c60b-4a39-b722-45c668f42570">
+
 </br>
 Feature rich art application, exposing offerings from the GDI+ framework.
 </br>
