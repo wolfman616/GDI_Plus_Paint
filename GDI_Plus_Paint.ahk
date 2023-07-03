@@ -342,7 +342,7 @@ loop, {
 	else,XNue1 := YNue1:= 0
 } settimer,EndCaps_orDie,-1
 if(TBClickBypass) {
-	send,{blind}{LButton down}
+	send,{blind}{LButton}
 	tt("TBClickBypass")
 	TBClickBypass:=False
 	sleep,40
@@ -623,24 +623,24 @@ WacomPenDip(arg1="",arg2="",arg3="",lwparam="",lwparam1="") { ;(Stylus-Pen enter
 }
 
 Pen_Me() {
-	tooltip % BrushMode_Current " `n" HatchBG " " HatchFG " " HatchStyle,100,150
+	; tooltip % BrushMode_Current " `n" HatchBG " " HatchFG " " HatchStyle,100,150
 	Gdip_DeletePen(pPen)
-	Gdip_SetPenWidth(pPen3,SzTip+5)
+,	Gdip_SetPenWidth(pPen3,SzTip+5)
 	switch,BrushMode_Current {
 		case,"solid" :	Gdip_SetPenCompoundArray(pPen:=Gdip_CreatePen(BSolidCol,5),compound)
 			;Gdip_RotatePenTransform(pPen,90)
 		case,"grad" : pPen:= Gdip_CreatePenFromBrush(pbrsh:= Gdip_CreateLineBrush(0,0,256,256,GradCol1,GradCol2),2)
 		case,"grad2" : pPen:= Gdip_CreatePenFromBrush(pbrsh:= Gdip_CreateLineBrush(0,0,256,256,GradCol1,GradCol2),2)
 			Gdip_PathGradientSetSurroundColors(pbrsh, GradCol3)
-			Gdip_PathGradientSetCenterColor(pbrsh, GradCol4)
-			Gdip_PathGradientSetCenterPoint(pbrsh, 0, 0)
-			Gdip_PathGradientCreateFromPath(Points_hist)
-			pPen:= Gdip_CreatePenFromBrush(pbrsh,SzTip)
+			,Gdip_PathGradientSetCenterColor(pbrsh, GradCol4)
+		,	Gdip_PathGradientSetCenterPoint(pbrsh, 0, 0)
+		,	Gdip_PathGradientCreateFromPath(Points_hist)
+		,	pPen:= Gdip_CreatePenFromBrush(pbrsh,SzTip)
 		case,"gdi" : pPen:= Gdip_CreatePenFromBrush(pbrsh:= Gdip_BrushCreateHatch(HatchFG, HatchBG, HatchStyle),2)
 		case,"gdi2" : pPen3:= Gdip_CreatePenFromBrush(pbrsh:= Gdip_CreateLineBrush(0,0,64,64,GradCol1,GradCol2),2)
-			Gdip_TranslateLinearGrBrushTransform(pbrsh,-32,0,1)
-			Gdip_SetPenWidth(pPen3,SzTip)
-			Gdip_SetPenCompoundArray(pPen:= Gdip_CreatePenFromBrush(pbrsh:= Gdip_BrushCreateHatch(HatchFG2,HatchBG2,HatchStyle),2),compound)
+		,	Gdip_TranslateLinearGrBrushTransform(pbrsh,-32,0,1)
+		,	Gdip_SetPenWidth(pPen3,SzTip)
+		,	Gdip_SetPenCompoundArray(pPen:= Gdip_CreatePenFromBrush(pbrsh:= Gdip_BrushCreateHatch(HatchFG2,HatchBG2,HatchStyle),2),compound)
 		case,"texture": Gdip_SetPenCompoundArray(pPen,compound)
 			, Gdip_SetPenCompoundArray(pPen:= Gdip_CreatePenFromBrush(WHBrush:= Gdip_CreateTextureBrush(File_2_pBMP(texturefile),0,0,0,127,126),SzTip),compound)
 	} Gdip_SetPenWidth(pPen,SzTip)
@@ -1108,6 +1108,7 @@ if(DCsMaxi<2) {
 	sendmessage,0x401,5,2,,ahk_id %HTB% ;sets enabled
 else,sendmessage,0x411,5,loword(0),,ahk_id %HTB%
 return,
+
 BlurGl(hWnd) {
 	ACCENT_DISABLED:= 0, ACCENT_ENABLE_GRADIENT:= 1, ACCENT_ENABLE_TRANSPARENTGRADIENT:= 2
 	ACCENT_ENABLE_BLURBEHIND:= 3, ACCENT_INVALID_STATE:= 4, WCA_ACCENT_POLICY:= 19
@@ -1219,8 +1220,7 @@ CardinalVector(x1="",y1="") { ;Make buffer/array of SzArr_Max for storing mouses
 			(y2!=y1)? (	(y2>y1)? South:= True : North:= True)
 			break,
 		}
-	}
-	loop,parse,% "North,South,East,West",`,
+	} loop,parse,% "North,South,East,West",`,
 		((%a_loopfield%)? CCT.=a_loopfield "-")
 	try,{
 		 Cards.push((CCT:= rTrim(CCT,"-")))
@@ -1243,6 +1243,8 @@ IsWindowVisible(hWnd) {
 
 WM_RBD() {
 	global
+		return,
+
 	send,{blind}{LButton down}
 	sendMessage,0xA1,2  ; WM_NCLButtonDOWN
 	while(getkeystate("rbutton","p"))
@@ -1508,6 +1510,10 @@ return,
 wm_lbu() { ;send,{LButton}
 	PostMessage,0xA2,2,,,ahk_id %hgui% ;WM_NCLButtonDOWN;
 }
+
+~j::
+HTB2pop:=false
+return,
 
 WM_MOUSEMOVE(wParam,lParam,msg,hWNd2) {
 	global
