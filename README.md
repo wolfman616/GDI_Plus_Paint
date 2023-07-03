@@ -1,5 +1,5 @@
 # GDI_Plus_Paint
-Windows GDI+ Drawing tool Compatible with stylus tablets
+Windows GDI+ Drawing tool compatible with stylus-tablet devices.
 </br>
 <img width="476" alt="Clipboarder 2023 07 02-003" src="https://github.com/wolfman616/GDI_Plus_Paint/assets/62726599/a6c397a0-9569-41f4-ac81-52a5a941a61b">
 </br>
@@ -16,8 +16,10 @@ Whilst application is active, by hooking mouse 1 and 2, clicks issued byu the st
 It is not more than a few weeks of work so far. Testing on the mouse input has not been carried out. Only the Pen stylus has been tested. There are numerous bugs with the WM_handlers from gui elements getting confused mostly due to timing discrepencies.
 
 : 2 do :
-resolve "WM_Accidental" edge-cases.
+Resolve "WM_Accidental" edge-cases.
 
 Refactor  undo/redo stages to incorporate the last brush stroke as a seperate bitmap which is then blitted into the overall image, thus allowing for repositioning of last stroke, or cut paste operations. Not sure when this should take place as do not what to interrupt fast-iteration multi-stroke pen operations.
 
 Reposition underlying gradient to enable a simillar start position for each stroke.
+
+integrate into screen snip regioning tool. 
