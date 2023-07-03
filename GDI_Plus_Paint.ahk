@@ -777,7 +777,7 @@ Pen_Me()
 return,
 
 GHatchStylelbl:
-gui,opt:submit,nohide
+gui,opt:submit,nohide 
 Pen_Me()
 return,
 
