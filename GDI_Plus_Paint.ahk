@@ -30,41 +30,27 @@ TB1TipsTXT:= "Undo_Go,Redo_Go,Undo_Go,Hide all strokes,Arrowhead tip,settings,Br
 ,OPT_ArrowHeads:= False
 ,Butt_EditMode:= False
 ,opt_TBUpDn:= "Down"
-,hatchfg:=  0xFF44BBFF
-,hatchbg:=  0xFF220544
-,hatchfg2:= 0x0044BBFF
-,hatchbg2:= 0xFF000000
-,bsolidcol:=0x996625FF
-,GradCol1:= 0x996625FF
-,GradCol2:= 0xFF44BBFF
-,gradcol3:= 0x00000000
-,gradcol4:= 0xFF44BBFF
-,gradcol5:= 0xFF990000
-,gradcol6:= 0xFF00AA00
-,OPT_MaxUndo_GoS:= 10
-;Opt_Pixelated:= True
+,BSolidCol:=0x996625FF
+,HatchFG:=  0xFF44BBFF, HatchBG := 0xFF220544
+,HatchFG2:= 0x0044BBFF, HatchBG2:= 0xFF000000
+,GradCol1:= 0x996625FF, GradCol2:= 0xFF44BBFF
+,GradCol3:= 0x00000000, GradCol4:= 0xFF44BBFF
+,GradCol5:= 0xFF990000, GradCol6:= 0xFF00AA00
+,OPT_MaxUndo_GoS:= 10 ;Opt_Pixelated:= True ;Testing;
 ,OPT_TBButtSz:= 58
 ,OPT_Sel_TT:= True
 ,G_visible:= True
-,tb1maxi:= 11 ;buttoncount for toolbar1. {Needed for calculating position offset, tme to integrate into the IL-func.}
+,TB1maxi:= 11 ;buttoncount for toolbar1. {Needed for calculating position offset, tme to integrate into the IL-func.}
 ,TB2maxi:= 5 ;buttoncount for toolbar2
 ,SzTip:= 3
 
 DpISet(), Aero_StartUp()
 , pToken:= Gdip_Startup()
 
-gosub,OnMsgz
-gosub,Varz
-gosub,Reg_Read
-gosub,Init_TBs
-gosub,Init_TipGUI
-gosub,Init_PalGui
-gosub,Init_OptGui
-gosub,Init_GDIGui
-gosub,NewKanvas
-gosub,ButtSEnact
-gosub,Bindz
-OPT_ArrowHeads:= False
+loop,parse,% "OnMsgz,Varz,Reg_Read,Init_TBs,Init_TipGUI,Init_PalGui,Init_OptGui,Init_GDIGui,NewKanvas,ButtSEnact,Bindz",`,
+	gosub,% a_loopfield 
+
+OPT_ArrowHeads:= False ;issue with it coming back on *possibly.
 
 menu,tray,icon,% "HICON:*" b64_2_hicon(trayicon64)
 menu,tray,icon
@@ -219,8 +205,9 @@ Canvas_Clear: ;~+c::
 gosub,CanvasClear
 gosub,initBlur2
 gosub,initPixelation
-Pen_Me()
-, pPen:= Gdip_CreatePenFromBrush(whbrush:= Gdip_CreateTextureBrush(b64_2_pBitmap(texturefileb64),0,0,0,127,126),3)
+;Pen_Me()
+;, pPen:= Gdip_CreatePenFromBrush(whbrush:= Gdip_CreateTextureBrush(b64_2_pBitmap(texturefileb64),0,0,0,127,126),3)
+WacomPenDip()
 return,
 
 Copy_go: ;~^c::
@@ -397,7 +384,8 @@ return,
 
 Init_PalGui:
 gui,col:New, -dpiscale +toolwindow -0x440000 -caption +hwndhpal +E0x2080008
-Pal64:= b64_2_hBitmap(a_iscompiled? pal64 : pal64_O)
+;Pal64:= b64_2_hBitmap(a_iscompiled? pal64 : pal64_O)
+Pal64:= b64_2_hBitmap(pal64)
 gui,col:add,pic,+hwndhPicPal x0 y0 ,% "HBITMAP:*" Pal64
 TB_:= wingetpos(hGui) ;WinSet,Region,30-30 W200 H200 E,ahk_id %hpal%
 gui,col:show,na hide xcenter yCenter w200 h200
@@ -411,9 +399,9 @@ return,
 Init_GDIGui: ;gui,gdi:add,pic,x0 y0,C:\Script\AHK\GDI\images\gdipalround-nq8.png
 gui,gdi:new,-dpiscale +toolwindow -0x440000 +E0x2080000 +HwndhGDIGui
 ;gui,gdi:add,pic,x0 y0 +hwndgdipalpicwnd,% a_IsCompiled? i:= (a_scriptdir . "\Res\gdipalround-nq8.png") : i:= ("HBITMAP:*" . GDPal64:= b64_2_hBitmap(b64gdi))
-if a_IsCompiled
+;if a_IsCompiled
 	gui,gdi:add,pic,x0 y0 +hwndgdipalpicwnd,% a_scriptdir "\Res\gdipalround-nq8.png"
-else,gui,gdi:add,pic,x0 y0 +hwndgdipalpicwnd,% "HBITMAP:*" . GDPal64:= b64_2_hBitmap(b64gdi)
+;else,gui,gdi:add,pic,x0 y0 +hwndgdipalpicwnd,% "HBITMAP:*" . GDPal64:= b64_2_hBitmap(b64gdi)
 gui,gdi:show,na hide center w442 h394 ;setimg(gdipalpicwnd,GDPal64)
 DllCall("dwmapi\DwmExtendFrameIntoClientArea","uint",hGDIGui,"uint",&rect0)
 return,
@@ -464,16 +452,16 @@ gui,opt:Add,edit,gtextureassign vTextureFile x1 y282 w180,%texturef%
 
 gui,opt:Add,text,Y302 X1
 gui,opt:Add,text,Y319 X1,% "SolidCol:"
-gui,opt:Add,edit,gGSolidStylelbl vbsolidcol x66 y314 w107,%bsolidcol%
+gui,opt:Add,edit,gGSolidStylelbl vBSolidCol x66 y314 w107,%BSolidCol%
 gui,opt:Add,text,Y345 X1,% "GradCol1:"
-gui,opt:Add,edit,gGGradStylelbl vgradco1 x66 y340 w107,%GradCol1%
+gui,opt:Add,edit,gGGradStylelbl vGradCo1 x66 y340 w107,%GradCol1%
 gui,opt:Add,text,Y410 X1,% "GradCol2:"
 gui,opt:Add,edit,gGGradStylelbl vGradCol2 x66 y415 w107,%GradCol2%
 gui,opt:Add,text,Y470 X1,% "Hatch_index:"
 gui,opt:Add,text,Y490 X1,% "HatchStyle:"
 gui,opt:Add,UpDown,x18 y439 +hwndHopt_Guibrsh1 Horz 16 h32 w32 Range1-52 gGHatchStylelbl vHatchStyle,% HatchStyle
 gui,opt:Add,text,X1 y445,% "GDI_FgCol1"
-gui,opt:Add,edit,gGHatchStylelbl vhatchfg x66 y450 w107,%hatchfg%
+gui,opt:Add,edit,gGHatchStylelbl vHatchFG x66 y450 w107,%HatchFG%
 gui,opt:Add,text,X1 y365,% "GDI_BgCol2"
 gui,opt:Add,edit,gGHatchStylelbl vhatchbg x66 y480 w107,%hatchbg%
 gui,opt:Add,text,X1 y500,% "Texture:"
@@ -503,7 +491,7 @@ return,
 Col_SelectL:
 mousegetpos,xc,yc
 PixelGetColor,OutputVar,xc,yc ;, Mode ;Gdip_SetPenColor(pPeni,Anu_)
-GradCol1:= bsolidcol:= OutputVar
+GradCol1:= BSolidCol:= OutputVar
 Anu_:= Format("{:#x}",Anu_:= strreplace(Nus:= bgrRGB(OutputVar,True),"0x","0xFF"))
 Gdip_DeletePen(pPeni)
 global pPeni:= Gdip_CreatePen(0xff00ff00,SzTip)
@@ -635,24 +623,24 @@ WacomPenDip(arg1="",arg2="",arg3="",lwparam="",lwparam1="") { ;(Stylus-Pen enter
 }
 
 Pen_Me() {
-	tooltip % BrushMode_Current " `n" hatchbg " " hatchfg " " HatchStyle,100,150
+	tooltip % BrushMode_Current " `n" HatchBG " " HatchFG " " HatchStyle,100,150
 	Gdip_DeletePen(pPen)
 	Gdip_SetPenWidth(pPen3,SzTip+5)
 	switch,BrushMode_Current {
-		case,"solid" :	Gdip_SetPenCompoundArray(pPen:=Gdip_CreatePen(bsolidcol,5),compound)
+		case,"solid" :	Gdip_SetPenCompoundArray(pPen:=Gdip_CreatePen(BSolidCol,5),compound)
 			;Gdip_RotatePenTransform(pPen,90)
 		case,"grad" : pPen:= Gdip_CreatePenFromBrush(pbrsh:= Gdip_CreateLineBrush(0,0,256,256,GradCol1,GradCol2),2)
 		case,"grad2" : pPen:= Gdip_CreatePenFromBrush(pbrsh:= Gdip_CreateLineBrush(0,0,256,256,GradCol1,GradCol2),2)
-			Gdip_PathGradientSetSurroundColors(pbrsh, gradcol3)
-			Gdip_PathGradientSetCenterColor(pbrsh, gradcol4)
+			Gdip_PathGradientSetSurroundColors(pbrsh, GradCol3)
+			Gdip_PathGradientSetCenterColor(pbrsh, GradCol4)
 			Gdip_PathGradientSetCenterPoint(pbrsh, 0, 0)
 			Gdip_PathGradientCreateFromPath(Points_hist)
 			pPen:= Gdip_CreatePenFromBrush(pbrsh,SzTip)
-		case,"gdi" : pPen:= Gdip_CreatePenFromBrush(pbrsh:= Gdip_BrushCreateHatch(hatchfg, hatchbg, HatchStyle),2)
+		case,"gdi" : pPen:= Gdip_CreatePenFromBrush(pbrsh:= Gdip_BrushCreateHatch(HatchFG, HatchBG, HatchStyle),2)
 		case,"gdi2" : pPen3:= Gdip_CreatePenFromBrush(pbrsh:= Gdip_CreateLineBrush(0,0,64,64,GradCol1,GradCol2),2)
 			Gdip_TranslateLinearGrBrushTransform(pbrsh,-32,0,1)
 			Gdip_SetPenWidth(pPen3,SzTip)
-			Gdip_SetPenCompoundArray(pPen:= Gdip_CreatePenFromBrush(pbrsh:= Gdip_BrushCreateHatch(hatchfg2,hatchbg2,HatchStyle),2),compound)
+			Gdip_SetPenCompoundArray(pPen:= Gdip_CreatePenFromBrush(pbrsh:= Gdip_BrushCreateHatch(HatchFG2,HatchBG2,HatchStyle),2),compound)
 		case,"texture": Gdip_SetPenCompoundArray(pPen,compound)
 			, Gdip_SetPenCompoundArray(pPen:= Gdip_CreatePenFromBrush(WHBrush:= Gdip_CreateTextureBrush(File_2_pBMP(texturefile),0,0,0,127,126),SzTip),compound)
 	} Gdip_SetPenWidth(pPen,SzTip)
@@ -697,6 +685,7 @@ FileGet(Image) {
 	DllCall("ole32\CreateStreamOnHGlobal","ptr",hData,"int",True,"ptr*",pStream:=0,"uint")
 	return,pStream
 }
+
 HIDInputMsg(wParam,lParam) { ; global GimpActive
 	local flags, s, xt:= yt:= 0 ;(GimpActive? Draw_Enabled:= False, return())
 	if(Draw_Enabled&&winactive,"ahk_Class gdkWindowToplevel")
@@ -747,8 +736,7 @@ return,
 GbrushModelbl:
 gui,opt:submit, nohide
 BrushType_index_set()
-Pen_Me()
-; msgbox,% BrushType_index " - " BrushMode_Current
+Pen_Me() ; msgbox,% BrushType_index " - " BrushMode_Current
 return,
 
 Gtexturefilelbl:
@@ -782,7 +770,7 @@ Pen_Me()
 return,
 
 Init_TBs:
-TB1:= [], TB1.w:= OPT_TBButtSz*tb1maxi+4, TB1.h:= OPT_TBButtSz+4, TB1.x:= (a_screenWidth/2)- (TB1.w/2), TB1.y:= a_screenHeight-TB1.h
+TB1:= [], TB1.w:= OPT_TBButtSz*TB1maxi+4, TB1.h:= OPT_TBButtSz+4, TB1.x:= (a_screenWidth/2)- (TB1.w/2), TB1.y:= a_screenHeight-TB1.h
 Gui,TB:New,-dpiscale +ToolWindow -0x440000 +e0x8 +HwndhGui  ; +e0x0000000
 Gui,TBc:New,-dpiscale +ToolWindow +e0x080008 -0x440000  +hwndhpic
 gui,TBc:color,000000
@@ -806,12 +794,10 @@ SendMessage,0x454,0,0x10,,ahk_id %HTB%
 win_move(HTB,0,0,TB1.W,TB1.H) ;sendmessage,0x411,0,loword(0),,ahk_id %HTB%
 win_move(hGui,TBX,TBY,TB1.W,TB1.H)
 win_move(hpic,TBX,TBY,TB1.W-3,TB1.H-3)
-WinAnimate(hGui,"activate slide vneg",100)
-;Gui,TBc:Show,% "na h" TB1.h " w" TB1.w " x" (tbx? tbx:(tbx:=(a_screenWidth/2) -(TB1.w /2))) " y" (tby?tby:(tby:=a_screenHeight -TB1.h -16))
+WinAnimate(hGui,"activate slide vneg",100) ;Gui,TBc:Show,% "na h" TB1.h " w" TB1.w " x" (tbx? tbx:(tbx:=(a_screenWidth/2) -(TB1.w /2))) " y" (tby?tby:(tby:=a_screenHeight -TB1.h -16))
 gosub,TB2init
 winset,transparent,250,ahk_id %hpic%
-BlurGl(hpic)
-; DllCall("SetParent","ptr",hpicc,"ptr",hgui)
+BlurGl(hpic) ; DllCall("SetParent","ptr",hpicc,"ptr",hgui)
 return,
 
 TB2Init:
@@ -833,12 +819,10 @@ WinAnimate(hGui2,"activate slide vneg",100)
 win_move(HTB2,0,TB2.h-(2*TB2.h),TB2.h,TB2.h)
 SendMessage,0x421,,,,% "ahk_id " HTB2 ;TB_AUTOSIZE;
 SendMessage,0x454,0,0x10,,ahk_id %HTB2%
-win_move(HTB2,0,TB2.h-(2*TB2.h),TB2.h,TB2.h)
-; WinAnimate(hTipGUI,(opt_TBUpDn="up"? "hide slide vneg":"hide slide vpos"),100)
+win_move(HTB2,0,TB2.h-(2*TB2.h),TB2.h,TB2.h) ; WinAnimate(hTipGUI,(opt_TBUpDn="up"? "hide slide vneg":"hide slide vpos"),100)
 , WinAnimate(hGui2,(opt_TBUpDn="up"? "hide slide vpos":"hide slide vneg"),100)
 sleep,100
- Re_TB(2,5)
-; DllCall("SetParent","ptr",hgui,"ptr",hgui2)
+Re_TB(2,5) ; DllCall("SetParent","ptr",hgui,"ptr",hgui2)
 return,
 
 Toolbar_SetButtSize(hCtrl,W,H="") {
@@ -852,12 +836,21 @@ IL_init(il:=1,Count:=1) {
 	global ;switch il{;case3: ;crucial to determining ctlclass specific TB-items.;}
 	static S_DIR:= a_scriptdir . "\res\"
 	(il>0&&il<4)? TBNo:=1 : ((il>3&&il<7)? TBNo:=2)
-	static ic1:= ("C:\Icon\64\SnipSketch64i.ico/C:\Icon\48\copy248.ico/C:\Icon\48\p.png/C:\Icon\64\kixtart202_3.ico/" . S_DIR . "draw\ico.dll,20/" . S_DIR . "ico.dll,16/" . S_DIR . "ico.dll,6/" . S_DIR . "move-nq8.png/" . S_DIR . "ico.dll,2/" . S_DIR . "ico.dll,10/" . S_DIR . "ico.dll,4/" . S_DIR . "ico.dll,15/C:\Icon\256\Tetris.ico") ;iNITIAL
-	, ic2:=("C:\Icon\64\SnipSketch64i.ico/C:\Icon\48\copy248.ico/C:\Icon\48\p.png/C:\Icon\128\Floppy - sDisk (48).png/" . S_DIR . "Redo_Go2_64.ico/" . S_DIR . "gbrusheraser.ico/" . S_DIR . "ico.dll,19/" . S_DIR . "ico.dll,18/" . S_DIR . "ico.dll,15/" . S_DIR . "move2-nq8.png/C:\Icon\256\eyecloseed.ico/" . S_DIR . "cog_4_64.ico/" . S_DIR . "binfull.ico/" . S_DIR . "brusheraser7.ico") ;HoVERED
-	, ic3:=("C:\Icon\64\SnipSketch64i.ico/C:\Icon\48\copy248.ico/C:\Icon\48\p.png/C:\Icon\128\CIcon128Floppy - sDisk _i_(48).png/C:\Icon\256\ticAMIGA.ico/C:\Icon\256\ticAMIGA.ico/" . S_DIR . "gbrusheraser9.ico/" . S_DIR . "move3-nq8.png/C:\Icon\256\ticAMIGA.ico/" . S_DIR . "cog_3_64.ico/" . S_DIR . "binfull.ico/C:\Icon\64\colw64.ico/" . S_DIR . "gbrusheraser8.ico") ;CLICKED
-	, ic4:= ("C:\Icon\256\Tetris.ico/C:\Icon\64\blr.ico/" . S_DIR . "ico.dll,6/" . S_DIR . "arrows_disabled64.ico/" . S_DIR . "ico.dll,10/C:\Icon\64\colw64.ico/" . S_DIR . "ico.dll,3/" . S_DIR . "ico.dll,3/C:\Icon\64\colw64.ico") ;iNITIAL
-	, ic5:=("C:\Icon\64\pix_grey.ico/C:\Icon\64\blr_grey.ico/" . S_DIR . "gbrusheraser.ico/C:\Icon\256\eyecloseed.ico/C:\Icon\64\colw64.ico/" . S_DIR . "cog_4_64.ico/" . S_DIR . "binfull.ico/" . S_DIR . "brusheraser7.ico") ;HoVERED
-	, ic6:=("C:\Icon\256\ticAMIGA.ico/C:\Icon\256\ticAMIGA.ico/" . S_DIR . "gbrusheraser9.ico/" . S_DIR . "alieneye (2).ico/C:\Icon\256\ticAMIGA.ico/" . S_DIR . "cog_3_64.ico/" . S_DIR . "binfull.ico/ mn-.0" . S_DIR . "gbrusheraser8.ico") ;CLICKED
+	static ic1:= ("C:\Icon\64\SnipSketch64i.ico/C:\Icon\48\copy248.ico/C:\Icon\48\p.png/C:\Icon\64\kixtart202_3.ico/" 
+	. S_DIR . "ico.dll,20/" . S_DIR . "ico.dll,16/" . S_DIR . "ico.dll,6/" . S_DIR . "move-nq8.png/" . S_DIR . "ico.dll,2/" 
+	. S_DIR . "ico.dll,10/" . S_DIR . "ico.dll,4/" . S_DIR . "ico.dll,15/C:\Icon\256\Tetris.ico") ;iNITIAL
+	, ic2:=("C:\Icon\64\SnipSketch64i.ico/C:\Icon\48\copy248.ico/C:\Icon\48\p.png/C:\Icon\128\Floppy - sDisk (48).png/" 
+	. S_DIR . "ico.dll,19/" . S_DIR . "ico.dll,18/" . S_DIR . "ico.dll,15/" . S_DIR . "move2-nq8.png/C:\Icon\256\eyecloseed.ico/" 
+	. S_DIR . "cog_4_64.ico/" . S_DIR . "binfull.ico/" . S_DIR . "brusheraser7.ico") ;HoVERED
+	, ic3:=("C:\Icon\64\SnipSketch64i.ico/C:\Icon\48\copy248.ico/C:\Icon\48\p.png/C:\Icon\128\CIcon128Floppy - sDisk _i_(48).png/C:\Icon\256\ticAMIGA.ico/C:\Icon\256\ticAMIGA.ico/" 
+	. S_DIR . "gbrusheraser9.ico/" . S_DIR . "move3-nq8.png/C:\Icon\256\ticAMIGA.ico/" . S_DIR . "cog_3_64.ico/" 
+	. S_DIR . "binfull.ico/C:\Icon\64\colw64.ico/" . S_DIR . "gbrusheraser8.ico") ;CLICKED
+	, ic4:= ("C:\Icon\256\Tetris.ico/C:\Icon\64\blr.ico/" . S_DIR . "arrows_disabled64.ico/" . S_DIR . "ico.dll,10/C:\Icon\64\colw64.ico/" 
+	. S_DIR . "ico.dll,3/" . S_DIR . "ico.dll,3/C:\Icon\64\colw64.ico") ;iNITIAL
+	, ic5:=("C:\Icon\64\pix_grey.ico/C:\Icon\64\blr_grey.ico/" . S_DIR . "gbrusheraser.ico/C:\Icon\256\eyecloseed.ico/C:\Icon\64\colw64.ico/" 
+	. S_DIR . "cog_4_64.ico/" . S_DIR . "binfull.ico/" . S_DIR . "brusheraser7.ico") ;HoVERED
+	, ic6:=("C:\Icon\256\ticAMIGA.ico/C:\Icon\256\ticAMIGA.ico/" . S_DIR . "gbrusheraser9.ico/" . S_DIR . "alieneye (2).ico/C:\Icon\256\ticAMIGA.ico/" 
+	. S_DIR . "cog_3_64.ico/" . S_DIR . "binfull.ico/ mn-.0" . S_DIR . "gbrusheraser8.ico") ;CLICKED
 	vCount:= Count 
 	, hIL%il%:= IL_Create(vCount,2,2), vSize:= A_PtrSize=8? 32:20
 	VarSetCapacity(TBBUTTON%TBNo%,vCount*vSize,0) ;for,i,tip in tb%TBNo%tips ;(vTxt%i%):= tip
@@ -1006,22 +999,22 @@ PalX:= TB_.x+(7*OPT_TBButtSz)+10
 return,
 
 #f4::
-(b_togl1:=!b_togl1)? disablebutt1(HTB,2) : enablebutt1(HTB,2)
+(B_Togl1:=!B_Togl1)? DisableButt1(HTB,2) : EnableButt1(HTB,2)
 return,
 
-disablebutt1(hwndtb,butt_num) {
+DisableButt1(hwndtb,butt_num) {
 	sendmessage,0x401,butt_num-1,loword(0),,ahk_id %hwndtb%
 }
 
-enablebutt1(hwndtb,butt_num) {
+EnableButt1(hwndtb,butt_num) {
 	sendmessage,0x401,butt_num-1,loword(1),,ahk_id %hwndtb%
 }
 
-enablebutt2(hwndtb,butt_num) {
+EnableButt2(hwndtb,butt_num) {
 	sendmessage,0x402,butt_num-1,loword(0),,ahk_id %hwndtb%
 }
 
-disablebutt2(hwndtb,butt_num) {
+DisableButt2(hwndtb,butt_num) {
 	sendmessage,0x402,butt_num-1,loword(0),,ahk_id %hwndtb%
 }
 
@@ -1044,18 +1037,18 @@ loop,5 {
 	switch a_index {
 		case,1:if(DCsMaxi<2) {
 			sendmessage,0x411,3,loword(0),,ahk_id %HTB%
-			disablebutt1(HTB,2)
-			, disablebutt1(HTB,1)
+			DisableButt1(HTB,2)
+			, DisableButt1(HTB,1)
 		} else {
-			enablebutt1(HTB,2)
-			, enablebutt1(HTB,1)
+			EnableButt1(HTB,2)
+			, EnableButt1(HTB,1)
 			sendmessage,0x401,3,1,,ahk_id %HTB%
 		}
 		case,2: if(oldMAX!=0)
 				 sendmessage,0x401,4,1,,ahk_id %HTB% ;sets enabled
 			else,sendmessage,0x411,4,loword(0),,ahk_id %HTB%
 			if(ololdmax!=0)
-				disablebutt1(HTB,3)
+				DisableButt1(HTB,3)
 		case,3: if(Draw_Erase) {
 				sendmessage,0x42b,6,11,,ahk_id %HTB% ;sets enabled
 				erasing:= True
@@ -1103,14 +1096,14 @@ Butt_Undo_Go_Update: ;thread,priority,-3
 if(DCsMaxi<2) {
 	sendmessage,0x411,4,loword(0),,ahk_id %HTB%
 	sendmessage,0x411,10,loword(0),,ahk_id %HTB%
-	disablebutt1(HTB,2)
-	, disablebutt1(HTB,1)
+	DisableButt1(HTB,2)
+	, DisableButt1(HTB,1)
 } else {
 	sendmessage,0x401,3,3,,ahk_id %HTB%
 	sendmessage,0x401,4,2,,ahk_id %HTB%
 	sendmessage,0x401,10,2,,ahk_id %HTB%
-	 enablebutt1(HTB,2)
-	, enablebutt1(HTB,1)
+	 EnableButt1(HTB,2)
+	, EnableButt1(HTB,1)
 } if(oldMAX!=0)
 	sendmessage,0x401,5,2,,ahk_id %HTB% ;sets enabled
 else,sendmessage,0x411,5,loword(0),,ahk_id %HTB%
@@ -1259,8 +1252,7 @@ WM_RBD() {
 }
 
 WM_Move() {
-	global
-;	if(!getkeystate("LButton","P")) {
+	global ;	if(!getkeystate("LButton","P")) {
 		HideVisibleGui(HoptGUI)
 		(IsWindowVisible(hGDIGui)? WinAnimate(hGDIGui,"hide center",100))
 		(IsWindowVisible(hGui2)?   WinAnimate(hGui2,(opt_TBUpDn="up"? "hide slide vpos":"hide slide vneg"),100))
@@ -1269,10 +1261,10 @@ WM_Move() {
 		tb_222:= wingetpos(hgui)
 		, win_move(hgui,tb_222.X,tb_222.Y,tb_222.W,  tb_222.H,"")
 		, win_move(hpic,tb_222.X,tb_222.Y,tb_222.W-3,tb_222.H-3,"")
-		if(iswindowvisible(hGDIGui))
+		if(iswindowvisible(hGDIGui)) {
 			winshow,ahk_id %hGDIGui%
-		return, ;WM_EXITSIZEMOVE()
-	;} else
+		return, ;WM_EXITSIZEMOVE()	;} else
+		}
 	{
 		rr2:= wingetpos(hgui)
 		win_move(hgui,rr2.X,rr2.Y,rr2.W,rr2.H,"")
@@ -1719,11 +1711,16 @@ setimg(gdipalpicwnd,GDPal64) ; imageputbase64({hbitmap:hbm })
 return,
 
 Varz:
-global TBClickBypass, G_Visible, Count_A, Width, Height, G, XNue, XNue1, XNue2, YNue, YNue1, YNue2, Pointz, WOld, HOld, XOldLow, YOldLow, XOldHigh, YOldLow, YOldHigh, HIL1, HIL2, HIL3, HIL4, HIL5, HIL6, HTB, HTB2, XS, YS, XF, YF, Pen_off,hGui,hGui2, erasing,PalX,PalY,hpal,hcolcov, hTipgui,dllhwnd,ggg, OPT_ReloadPrevSession, r_pid, CounTest1, pPen3, pPen, WHBrush, rpen, hTipgui,OPT_TBButtSz, TB1Maxi, TB2Maxi, opt_TBUpDn, hatchfg, hatchbg, hatchfg2, hatchbg2
-, CurChanged, CurChanged2, CurChanged3, CurChanged4, GimpActive, Redo_Going, Draw_Enabled, Opt_SzTip, HOpt_SzTip, Pointz_Hist, OBM, HBM, mDC, hwnd1, BrushDC, HPic,hPicPal, test3state, test4state, optGui_H, Hopt_gui,Hoptgui,Hopt_Guiblit1, hOPT_Blit1Txt, MovedOn2, b_togl1, BrushType_index, GradCol1, GradCol2, TextureFile
-, G, G2, G3, G4, pToken, Toggle_Rep, pBitmap_, New_Max_i, Butt_EditMode, Draw_Erase, SzTip, HTB2pop, palpopped, TB_, opt_TbautoOrient, HatchStyle, hGDIgui,pal64, Compound, S_DIR
-, OldOldMax:= 0, oldMAX:= 0, DCsMaxi:= 1, opt_MaxUndo_GoS, Cards_i, Opt_Pixelated, pBitmappoo, HDC, hdc2, mDC5, opt_blur, mDC3, hdcMem, BrushMode_Current, pToken
-, Opt_ArrowHeads, OPT_Sel_TT, DCs:= [], HBs:= [], OBs:= [], Cards:=[], TB1, TB2, hwnd3, hbmp3, hdc3, hdcMem3, hdcOld3, pBitmap3, rr, ps,bsolidcol,b64gdi, gdipalpicwnd, sun4864, texturefileb64
+global TBClickBypass, G_Visible, Count_A, Width, Height, G, XNue, XNue1, XNue2, YNue, YNue1, YNue2, Pointz, WOld, HOld, XOldLow, YOldLow
+, XOldHigh, YOldLow, YOldHigh, HIL1, HIL2, HIL3, HIL4, HIL5, HIL6, HTB, HTB2, XS, YS, XF, YF, Pen_off, hGui, hGui2, erasing, PalX, PalY
+, hpal,hcolcov, hTipgui, dllhwnd, ggg, OPT_ReloadPrevSession, r_pid, CounTest1, pPen3, pPen, WHBrush, rpen, hTipgui, OPT_TBButtSz, TB1maxi
+, TB2Maxi, opt_TBUpDn, HatchFG, HatchBG, HatchFG2, HatchBG2, CurChanged, CurChanged2, CurChanged3, CurChanged4, GimpActive, Redo_Going
+, Draw_Enabled, Opt_SzTip, HOpt_SzTip, Pointz_Hist, OBM, HBM, mDC, hwnd1, BrushDC, HPic,hPicPal, test3state, test4state, optGui_H, Hopt_gui
+, Hoptgui,Hopt_Guiblit1, hOPT_Blit1Txt, MovedOn2, B_Togl1, BrushType_index, GradCol1, GradCol2, TextureFile, G, G2, G3, G4, pToken
+, Toggle_Rep, pBitmap_, New_Max_i, Butt_EditMode, Draw_Erase, SzTip, HTB2pop, palpopped, TB_, opt_TbautoOrient, HatchStyle, hGDIgui
+, pal64, Compound, S_DIR, OldOldMax:= 0, oldMAX:= 0, DCsMaxi:= 1, opt_MaxUndo_GoS, Cards_i, Opt_Pixelated, pBitmappoo, HDC, hdc2, mDC5
+, opt_blur, mDC3, hdcMem, BrushMode_Current, pToken, Opt_ArrowHeads, OPT_Sel_TT, DCs:= [], HBs:= [], OBs:= [], Cards:=[], TB1, TB2, hwnd3
+, hbmp3, hdc3, hdcMem3, hdcOld3, pBitmap3, rr, ps,BSolidCol,b64gdi, gdipalpicwnd, sun4864, texturefileb64
 , r3gk3y:= "HKCU\SOFTWARE\_MW\gdi_draw"
 , Cur_Brush:= DllCall("LoadImage","Int",0,"Str","C:\Icon\- Icons\- CuRS0R\gimp-tool-paintbrush.cur","Int",2,"Int",56,"Int",56,"UInt",0x10,"Ptr")
 , Cur_Eraser:= DllCall("LoadImage","Int",0,"Str","C:\Icon\- Icons\- CuRS0R\eraser_2.cur","Int",2,"Int",64,"Int",64,"UInt",0x10,"Ptr")
@@ -1735,7 +1732,9 @@ global TBClickBypass, G_Visible, Count_A, Width, Height, G, XNue, XNue1, XNue2, 
 , MERGEPAInt:= 0x00BB0226, MERGECOPY:= 0x00C000CA, SRCCOPY:= 0x00CC0020, SRCPAInt:= 0x00EE0086
 , PATCOPY:= 0x00F00021, PATPAInt:= 0x00FB0A09, WHITENESS:= 0x00FF0062, CAPTUREBLT:= 0x40000000
 , NOMIRRORBITMAP:= 0x80000000,SRCCOPY:= 0x00CC0020,SRCERASE:= 0x00440328
-, blitmodes:= [], blitmodes:= ({BLACKNESS: BLACKNESS, NOTSRCERASE:NOTSRCERASE, NOTSRCCOPY:NOTSRCCOPY,SRCERASE:SRCERASE, DSTINVERT:DSTINVERT, PATINVERT:PATINVERT, SRCINVERT:SRCINVERT, SRCAND:SRCAND, MERGEPAInt:MERGEPAInt, MERGECOPY:MERGECOPY, SRCCOPY:SRCCOPY, SRCPAInt:SRCPAInt, PATCOPY:PATCOPY, PATPAInt:PATPAInt, WHITENESS:WHITENESS, CAPTUREBLT:CAPTUREBLT, NOMIRRORBITMAP:NOMIRRORBITMAP})
+, blitmodes:= [], blitmodes:= ({BLACKNESS: BLACKNESS, NOTSRCERASE:NOTSRCERASE, NOTSRCCOPY:NOTSRCCOPY,SRCERASE:SRCERASE, DSTINVERT:DSTINVERT
+, PATINVERT:PATINVERT, SRCINVERT:SRCINVERT, SRCAND:SRCAND, MERGEPAInt:MERGEPAInt, MERGECOPY:MERGECOPY, SRCCOPY:SRCCOPY, SRCPAInt:SRCPAInt
+, PATCOPY:PATCOPY, PATPAInt:PATPAInt, WHITENESS:WHITENESS, CAPTUREBLT:CAPTUREBLT, NOMIRRORBITMAP:NOMIRRORBITMAP})
 , blitindex:=13, GUIBlitMode1:=13,rect0
 , Ptr:= A_PtrSize? "UPtr":"UInt", int:= "int"
 VarSetCapacity(rect0,16,0xff)
