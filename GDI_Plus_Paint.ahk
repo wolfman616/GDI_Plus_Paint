@@ -397,7 +397,7 @@ return,
 
 Init_PalGui:
 gui,col:New, -dpiscale +toolwindow -0x440000 -caption +hwndhpal +E0x2080008
-Pal64:= b64_2_hBitmap(pal64_O)
+Pal64:= b64_2_hBitmap(a_iscompiled? pal64 : pal64_O)
 gui,col:add,pic,+hwndhPicPal x0 y0 ,% "HBITMAP:*" Pal64
 TB_:= wingetpos(hGui) ;WinSet,Region,30-30 W200 H200 E,ahk_id %hpal%
 gui,col:show,na hide xcenter yCenter w200 h200
@@ -410,7 +410,10 @@ return,
 
 Init_GDIGui: ;gui,gdi:add,pic,x0 y0,C:\Script\AHK\GDI\images\gdipalround-nq8.png
 gui,gdi:new,-dpiscale +toolwindow -0x440000 +E0x2080000 +HwndhGDIGui
-gui,gdi:add,pic,x0 y0 +hwndgdipalpicwnd,% "HBITMAP:*" GDPal64:= b64_2_hBitmap(b64gdi)
+;gui,gdi:add,pic,x0 y0 +hwndgdipalpicwnd,% a_IsCompiled? i:= (a_scriptdir . "\Res\gdipalround-nq8.png") : i:= ("HBITMAP:*" . GDPal64:= b64_2_hBitmap(b64gdi))
+if a_IsCompiled
+	gui,gdi:add,pic,x0 y0 +hwndgdipalpicwnd,% a_scriptdir "\Res\gdipalround-nq8.png"
+else,gui,gdi:add,pic,x0 y0 +hwndgdipalpicwnd,% "HBITMAP:*" . GDPal64:= b64_2_hBitmap(b64gdi)
 gui,gdi:show,na hide center w442 h394 ;setimg(gdipalpicwnd,GDPal64)
 DllCall("dwmapi\DwmExtendFrameIntoClientArea","uint",hGDIGui,"uint",&rect0)
 return,
@@ -784,7 +787,7 @@ Gui,TB:New,-dpiscale +ToolWindow -0x440000 +e0x8 +HwndhGui  ; +e0x0000000
 Gui,TBc:New,-dpiscale +ToolWindow +e0x080008 -0x440000  +hwndhpic
 gui,TBc:color,000000
 Gui,TB:Add,Custom,ClassToolbarWindow32 0x943 ;TBSTYLE_TOOLTIPS-FLAT0x100-0x800;
-Gui,TBc:Add,pic,+hwndhpicc x0 y0,C:\Script\AHK\GUi\resources\tbbk.png
+Gui,TBc:Add,pic,+hwndhpicc x0 y0,%  a_scriptdir . "\res\tbbk.png"
 ControlGet,HTB,Hwnd,,ToolbarWindow321,% "ahk_id " hGui
 SendMessage,0x43C,0,0,,% "ahk_id " HTB ;TB_SETMAXTEXTROWS ;text omitted from buttons;
 Toolbar_SetButtSize(HTB,OPT_TBButtSz,OPT_TBButtSz), hIL1:= IL_init(1,11), hIL2:= IL_init(2,11), hIL3:= IL_init(3,11), vMsg:= A_IsUnicode? 0x444:0x414
@@ -847,14 +850,14 @@ Toolbar_SetButtSize(hCtrl,W,H="") {
 
 IL_init(il:=1,Count:=1) {
 	global ;switch il{;case3: ;crucial to determining ctlclass specific TB-items.;}
-	static S_DIR:= "C:\Script\AHK\GUi"
+	static S_DIR:= a_scriptdir . "\res\"
 	(il>0&&il<4)? TBNo:=1 : ((il>3&&il<7)? TBNo:=2)
-	static ic1:= ("C:\Icon\64\SnipSketch64i.ico/C:\Icon\48\copy248.ico/C:\Icon\48\p.png/C:\Icon\64\kixtart202_3.ico/" . S_DIR . "\resources\draw\ico.dll,20/" . S_DIR . "\resources\draw\ico.dll,16/" . S_DIR . "\resources\draw\ico.dll,6/" . S_DIR . "\resources\move-nq8.png/" . S_DIR . "\resources\draw\ico.dll,2/" . S_DIR . "\resources\draw\ico.dll,10/" . S_DIR . "\resources\draw\ico.dll,4/" . S_DIR . "\resources\draw\ico.dll,15/C:\Icon\256\Tetris.ico") ;iNITIAL
-	, ic2:=("C:\Icon\64\SnipSketch64i.ico/C:\Icon\48\copy248.ico/C:\Icon\48\p.png/C:\Icon\128\Floppy - sDisk (48).png/" . S_DIR . "\resources\Redo_Go2_64.ico/" . S_DIR . "\resources\gbrusheraser.ico/" . S_DIR . "\resources\draw\ico.dll,19/" . S_DIR . "\resources\draw\ico.dll,18/" . S_DIR . "\resources\draw\ico.dll,15/" . S_DIR . "\resources\move2-nq8.png/C:\Icon\256\eyecloseed.ico/" . S_DIR . "\resources\draw\cog_4_64.ico/" . S_DIR . "\resources\draw\binfull.ico/" . S_DIR . "\resources\brusheraser7.ico") ;HoVERED
-	, ic3:=("C:\Icon\64\SnipSketch64i.ico/C:\Icon\48\copy248.ico/C:\Icon\48\p.png/C:\Icon\128\CIcon128Floppy - sDisk _i_(48).png/C:\Icon\256\ticAMIGA.ico/C:\Icon\256\ticAMIGA.ico/" . S_DIR . "\resources\draw\gbrusheraser9.ico/" . S_DIR . "\resources\draw\move3-nq8.png/C:\Icon\256\ticAMIGA.ico/" . S_DIR . "\resources\draw\cog_3_64.ico/" . S_DIR . "\resources\binfull.ico/C:\Icon\64\colw64.ico/" . S_DIR . "\resources\draw\gbrusheraser8.ico") ;CLICKED
-	, ic4:= ("C:\Icon\256\Tetris.ico/C:\Icon\64\blr.ico/" . S_DIR . "\resources\draw\ico.dll,6/" . S_DIR . "\resources\arrows_disabled64.ico/" . S_DIR . "\resources\draw\ico.dll,10/C:\Icon\64\colw64.ico/" . S_DIR . "\resources\draw\ico.dll,3/" . S_DIR . "\resources\draw\ico.dll,3/C:\Icon\64\colw64.ico") ;iNITIAL
-	, ic5:=("C:\Icon\64\pix_grey.ico/C:\Icon\64\blr_grey.ico/" . S_DIR . "\resources\gbrusheraser.ico/C:\Icon\256\eyecloseed.ico/C:\Icon\64\colw64.ico/" . S_DIR . "\resources\cog_4_64.ico/" . S_DIR . "\resources\binfull.ico/" . S_DIR . "\resources\brusheraser7.ico") ;HoVERED
-	, ic6:=("C:\Icon\256\ticAMIGA.ico/C:\Icon\256\ticAMIGA.ico/" . S_DIR . "\resources\gbrusheraser9.ico/" . S_DIR . "\resources\alieneye (2).ico/C:\Icon\256\ticAMIGA.ico/" . S_DIR . "\resources\cog_3_64.ico/" . S_DIR . "\resources\binfull.ico/ mn-.0" . S_DIR . "\resources\gbrusheraser8.ico") ;CLICKED
+	static ic1:= ("C:\Icon\64\SnipSketch64i.ico/C:\Icon\48\copy248.ico/C:\Icon\48\p.png/C:\Icon\64\kixtart202_3.ico/" . S_DIR . "draw\ico.dll,20/" . S_DIR . "ico.dll,16/" . S_DIR . "ico.dll,6/" . S_DIR . "move-nq8.png/" . S_DIR . "ico.dll,2/" . S_DIR . "ico.dll,10/" . S_DIR . "ico.dll,4/" . S_DIR . "ico.dll,15/C:\Icon\256\Tetris.ico") ;iNITIAL
+	, ic2:=("C:\Icon\64\SnipSketch64i.ico/C:\Icon\48\copy248.ico/C:\Icon\48\p.png/C:\Icon\128\Floppy - sDisk (48).png/" . S_DIR . "Redo_Go2_64.ico/" . S_DIR . "gbrusheraser.ico/" . S_DIR . "ico.dll,19/" . S_DIR . "ico.dll,18/" . S_DIR . "ico.dll,15/" . S_DIR . "move2-nq8.png/C:\Icon\256\eyecloseed.ico/" . S_DIR . "cog_4_64.ico/" . S_DIR . "binfull.ico/" . S_DIR . "brusheraser7.ico") ;HoVERED
+	, ic3:=("C:\Icon\64\SnipSketch64i.ico/C:\Icon\48\copy248.ico/C:\Icon\48\p.png/C:\Icon\128\CIcon128Floppy - sDisk _i_(48).png/C:\Icon\256\ticAMIGA.ico/C:\Icon\256\ticAMIGA.ico/" . S_DIR . "gbrusheraser9.ico/" . S_DIR . "move3-nq8.png/C:\Icon\256\ticAMIGA.ico/" . S_DIR . "cog_3_64.ico/" . S_DIR . "binfull.ico/C:\Icon\64\colw64.ico/" . S_DIR . "gbrusheraser8.ico") ;CLICKED
+	, ic4:= ("C:\Icon\256\Tetris.ico/C:\Icon\64\blr.ico/" . S_DIR . "ico.dll,6/" . S_DIR . "arrows_disabled64.ico/" . S_DIR . "ico.dll,10/C:\Icon\64\colw64.ico/" . S_DIR . "ico.dll,3/" . S_DIR . "ico.dll,3/C:\Icon\64\colw64.ico") ;iNITIAL
+	, ic5:=("C:\Icon\64\pix_grey.ico/C:\Icon\64\blr_grey.ico/" . S_DIR . "gbrusheraser.ico/C:\Icon\256\eyecloseed.ico/C:\Icon\64\colw64.ico/" . S_DIR . "cog_4_64.ico/" . S_DIR . "binfull.ico/" . S_DIR . "brusheraser7.ico") ;HoVERED
+	, ic6:=("C:\Icon\256\ticAMIGA.ico/C:\Icon\256\ticAMIGA.ico/" . S_DIR . "gbrusheraser9.ico/" . S_DIR . "alieneye (2).ico/C:\Icon\256\ticAMIGA.ico/" . S_DIR . "cog_3_64.ico/" . S_DIR . "binfull.ico/ mn-.0" . S_DIR . "gbrusheraser8.ico") ;CLICKED
 	vCount:= Count 
 	, hIL%il%:= IL_Create(vCount,2,2), vSize:= A_PtrSize=8? 32:20
 	VarSetCapacity(TBBUTTON%TBNo%,vCount*vSize,0) ;for,i,tip in tb%TBNo%tips ;(vTxt%i%):= tip
